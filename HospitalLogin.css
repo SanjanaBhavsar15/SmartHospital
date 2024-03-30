@@ -1,0 +1,49 @@
+.hospital-login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80vh;
+}
+
+.hospital-login-form {
+    width: 400px;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.hospital-login-form h2 {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.hospital-login-form .form-group {
+    margin-bottom: 20px;
+}
+
+.hospital-login-form label {
+    font-weight: bold;
+}
+
+.hospital-login-form input[type="text"],
+.hospital-login-form input[type="password"] {
+    width: 95%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.hospital-login-form button {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}
+
+.hospital-login-form button:hover {
+    background-color: #0056b3;
+}
