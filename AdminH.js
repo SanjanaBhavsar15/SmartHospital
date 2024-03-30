@@ -1,16 +1,43 @@
 import React, { useState } from 'react';
 import './HospitalLogin.css';
 import { useNavigate } from 'react-router-dom';
+import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
+import axios from 'axios'
 const AdminLogin = () => {
-    const [username, setUsername] = useState('');
+    const [email,setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [login,setLogin]=useState({})
-    const handleLogin = (e) => {
-        e.preventDefault();
-        setLogin({"name":username,"pass": password})
+    const [isAlert,setIsAlert]=useState(false)
+    const handleLogin = () => {
+        if (email.trim() === '') {
+            setIsAlert(true)
+            setTimeout(() => {
+                setIsAlert(false)
+            }, 3000);
+            return
+        }
+        if (password.trim() === '') {
+            setIsAlert(true)
+            setTimeout(() => {
+                setIsAlert(false)
+            }, 3000);
+            return
+        }
+        else{
+        setLogin({"email":email,"pass": password});
         console.log("login",login)
-        console.log('Username:', username);
+        console.log('Email:', email); 
         console.log('Password:', password);
+        setIsAlert(false)
+        navigate('/admin/dashboard')  
+        }  
+        try{
+            axios.post('http://localhost:5000/hospital/login',email,password)
+        }
+        catch(err){
+            console.log('err',err)
+        }
     };
     let navigate=useNavigate()
     return (
@@ -22,14 +49,14 @@ const AdminLogin = () => {
                 <h2>Login</h2>
                 <form onSubmit={handleLogin}>
                     <div className="form-group">
-                        <label htmlFor="username">Username</label>
+                        <label htmlFor="username">Email</label>
                         <input
-                            type="text"
+                            type="email"
                             className="form-control"
-                            id="username"
-                            placeholder="Enter username"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
+                            id="email"
+                            placeholder="Email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
                             required
                         />
                     </div>
@@ -39,13 +66,16 @@ const AdminLogin = () => {
                             type="password"
                             className="form-control"
                             id="password"
-                            placeholder="Enter password"
+                            placeholder="Password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
                         />
                     </div>
-                    <button type="submit" className="btn btn-primary" onClick={()=>{navigate('/admin/dashboard')}}>Login</button><br/><br/>
+                    {isAlert && <Stack sx={{ width: '100%' }} spacing={2}>
+                        <Alert severity="error">Please enter details.</Alert>
+                    </Stack>}<br/>
+                    <button type="submit" className="btn btn-primary" onClick={()=>handleLogin()}>Login</button><br/><br/>
                     <button type='submit' className='btn btn-primary' onClick={()=>{navigate('/admin/registration')}}>Register</button>
                 </form>
             </div>

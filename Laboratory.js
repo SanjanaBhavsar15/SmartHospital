@@ -87,7 +87,6 @@ function Laboratory() {
                 setUpdateAlert(false)
             }, 3000);
             try{
-                let dat=labData.name
                 axios.post('http://localhost:5000/lab/update',labData)
                 console.log("data updated")
             }
