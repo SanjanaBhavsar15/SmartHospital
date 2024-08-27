@@ -9,7 +9,7 @@ function RegistrationA() {
         phoneNumber:'',
         email:'',
         password:'',
-    })
+    }) 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setData(prevState => ({

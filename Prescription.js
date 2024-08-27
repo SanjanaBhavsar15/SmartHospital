@@ -1,28 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBars, faUserCircle } from "@fortawesome/free-solid-svg-icons";
-import { useNavigate } from "react-router-dom";
 import "./DrawerMenu.css";
-import "./Appointment.css";
-import Alert from "@mui/material/Alert";
-import Stack from "@mui/material/Stack";
+import { useNavigate } from "react-router-dom";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
+import { DialogContentText } from "@mui/material";
 import axios from "axios";
-function Appointments() {
-  const [add, setAdd] = useState(false);
-  const [appointmentData, setAppointmentData] = useState({
-    patientId: "",
-    doctorId: "",
-    time: "",
-  });
+function Prescription() {
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [editProfile, setEditProfile] = useState(false);
   const [formData, setFormData] = useState({
-    hospitalName: "",
+    hospitalname: "",
     fullname: "",
-    DOB: "",
+    dob: "",
     age: "",
     gender: "",
     contact: "",
@@ -30,125 +24,6 @@ function Appointments() {
     username: "",
     password: "",
   });
-  const [appointmentsList, setAppointmentsList] = useState([]);
-  const [selectedIndex, setSelectedIndex] = useState(null);
-  const [addAlert, setAddAlert] = useState(false);
-  const [updateAlert, setUpdateAlert] = useState(false);
-  const [deleteAlert, setDeleteAlert] = useState(false);
-  const [deleteSuccessAlert, setDeleteSuccessAlert] = useState(false);
-  const [editProfile, setEditProfile] = useState(false);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [doc, setDoc] = useState([]);
-  const [pec, setPec] = useState([]);
-
-  const toggleDrawer = () => {
-    setIsDrawerOpen(!isDrawerOpen);
-  };
-  const ProfileDrawer = () => {
-    setIsProfileOpen(!isProfileOpen);
-  };
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setAppointmentData((prevState) => ({
-      ...prevState,
-      [name]: value,
-    }));
-  };
-  const handleAdd = () => {
-    setAdd(true);
-  };
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (selectedIndex !== null) {
-      const updatedAppointmentsList = [...appointmentsList];
-      updatedAppointmentsList[selectedIndex] = appointmentData;
-      setAppointmentsList(updatedAppointmentsList);
-      setSelectedIndex(null);
-      try {
-        await axios.put(
-          "http://localhost:5000/appointment/update",
-          appointmentData
-        );
-        console.log("Appointment updated successfully");
-      } catch (error) {
-        console.error("Error updating appointment:", error);
-      }
-      setUpdateAlert(true);
-      setTimeout(() => {
-        setUpdateAlert(false);
-      }, 3000);
-    } else {
-      setAppointmentsList([...appointmentsList, appointmentData]);
-      try {
-        axios.post("http://localhost:5000/appointment/create", appointmentData);
-        console.log("data sent");
-      } catch (err) {
-        console.log("err", err);
-      }
-      setAddAlert(true);
-      setTimeout(() => {
-        setAddAlert(false);
-      }, 3000);
-    }
-    setAdd(false);
-    setAppointmentData({
-      patientId: "",
-      doctorId: "",
-      time: "",
-    });
-    console.log(appointmentData);
-  };
-  const handleSubmit1 = (e) => {
-    e.preventDefault();
-    console.log(formData);
-  };
-  const handleUpdate = (index) => {
-    setAdd(true);
-    setAppointmentData(appointmentsList[index]);
-    setSelectedIndex(index);
-  };
-  const handleDelete = (index) => {
-    setSelectedIndex(index);
-    setSelectedAppointmentId(appointmentsList[index]._id);
-    setDeleteAlert(true);
-  };
-  const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
-  const handleAgree = async () => {
-    if (selectedAppointmentId) {
-      try {
-        await axios.delete(
-          `http://localhost:5000/appointment/delete?doctorId=${selectedAppointmentId}`
-        );
-        console.log("Appointment deleted successfully");
-        setAppointmentsList((prevAppointments) =>
-          prevAppointments.filter(
-            (appointment) => appointment._id !== selectedAppointmentId
-          )
-        );
-        setDeleteSuccessAlert(true);
-        setTimeout(() => {
-          setDeleteSuccessAlert(false);
-        }, 3000);
-      } catch (error) {
-        console.error("Error deleting appointment:", error);
-      }
-    }
-    setDeleteAlert(false);
-  };
-
-  const handleDisagree = () => {
-    setDeleteAlert(false);
-  };
-  const handleEdit = () => {
-    setEditProfile(true);
-  };
-  const handleClose = () => {
-    setEditProfile(false);
-  };
-  const handleClose1 = () => {
-    setAdd(false);
-  };
   const handleChange1 = (e) => {
     const { name, value } = e.target;
     setFormData((prevState) => ({
@@ -156,50 +31,152 @@ function Appointments() {
       [name]: value,
     }));
   };
+  const toggleDrawer = () => {
+    setIsDrawerOpen(!isDrawerOpen);
+  };
+  const ProfileDrawer = () => {
+    setIsProfileOpen(!isProfileOpen);
+  };
+  const handleEdit = () => {
+    setEditProfile(true);
+  };
+  const handleClose = () => {
+    setEditProfile(false);
+  };
   const handleCancel = () => {
     setEditProfile(false);
     setIsProfileOpen(false);
   };
-  const handleCancel1 = () => {
+  const handleSubmit1 = (e) => {
+    e.preventDefault();
+    console.log(formData);
+  };
+  const [prescription, setPrescription] = useState({
+    patientId: "",
+    doctorId: "",
+    prescription: "",
+  });
+  const [newPrescription, setNewPrescription] = useState([]);
+  const [add, setAdd] = useState(false);
+  const handleDialogClose = () => {
     setAdd(false);
   };
-  let navigate = useNavigate();
+  const handleAdd = () => {
+    setAdd(true);
+  };
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    console.log(name)
+    if (name === "patientId") {
+      setPrescription((prevState) => ({
+        ...prevState,
+        [name]: value,
+      }));
+    }
+    setPrescription((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
+  const [selectedIndex, setSelectedIndex] = useState(null);
+  const handleDialogSubmit = async (e) => {
+    console.log(prescription)
+    // e.preventDefault();
+    if (selectedIndex !== null) {
+      const updatedPrescription = [...newPrescription];
+      updatedPrescription[selectedIndex] = prescription;
+      setNewPrescription(updatedPrescription);
+      setSelectedIndex(null);
+      try {
+        await axios.post(
+          "http://localhost:5000/prescription/update",
+          prescription
+        );
+        console.log("Data updated successfully");
+      } catch (error) {
+        console.error("Error updating appointment:", error);
+      }
+    } else {
+      setNewPrescription([...newPrescription, prescription]);
+      try {
+        axios.post("http://localhost:5000/prescription/create", prescription)
+        console.log('added')
+      
+      } catch (err) {
+        console.log("err", err);
+      }
+    }
+    setAdd(false)
+    setPrescription({
+      patientId: '',
+      doctorId: '',
+      prescription: '',
+    });
+    console.log(prescription);
+  };
+  const handleDialogCancel = () => {
+    setAdd(false);
+  };
+  const handleUpdate = (index) => {
+    setAdd(true);
+    setPrescription(newPrescription[index]);
+    setSelectedIndex(index);
+  };
+  const [deleteAlert, setDeleteAlert] = useState(false);
+  const handleDelete = (index) => {
+    setSelectedIndex(index);
+    setDeleteAlert(true);
+  };
+  const handleAgree = async () => {
+    if (selectedIndex != null) {
+      try {
+        // Make the delete API call
+        await axios.delete("http://localhost:5000/prescription/delete");
+        console.log("Data deleted successfully");
+      } catch (error) {
+        console.error("Error deleting appointment:", error);
+      }
+      const updatePrescription = newPrescription.filter(
+        (appointment, index) => index !== selectedIndex
+      );
+      setNewPrescription(updatePrescription);
+      setSelectedIndex(null);
+    }
+    setDeleteAlert(false);
+  };
+  const handleDisagree = () => {
+    setDeleteAlert(false);
+  };
+  const [doc, setDoc] = useState([]);
+  const [pec, setPec] = useState([]);
+
   useEffect(() => {
-    // Fetch appointments data when component mounts
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:5000/appointment/read"
-        );
+        const response = await axios.get('http://localhost:5000/prescription/read');
         console.log("Appointments:", response.data);
-        setAppointmentsList(response.data.data);
+        setNewPrescription(response.data.data);
       } catch (error) {
-        console.error("Error fetching appointments:", error);
+        console.error('Error fetching appointments:', error);
       }
     };
     fetchData();
-    axios
-      .get("http://localhost:5000/doctor/read")
+
+    axios.get('http://localhost:5000/doctor/read')
       .then((data) => {
         console.log("Doctors:", data);
-        const doctorNames = data.data.data.map((ele) => ({
-          id: ele._id,
-          name: ele.name,
-        }));
+        const doctorNames = data.data.data.map((ele) => ({ id: ele._id, name: ele.name }));
         setDoc(doctorNames);
       })
       .catch((err) => {
         console.log(err);
       });
 
-    axios
-      .get("http://localhost:5000/patient/read")
+      axios.get('http://localhost:5000/patient/read')
       .then((data) => {
         console.log("Patients:", data);
-        const patientNames = data.data.data.map((ele) => ({
-          id: ele._id,
-          name: ele.name,
-        }));
+        const patientNames = data.data.data.map((ele) => ({ id: ele._id, name: ele.name }));
         setPec(patientNames);
       })
       .catch((err) => {
@@ -213,10 +190,11 @@ function Appointments() {
 
   const getPatientNameById = (id) => {
     const patient = pec.find((p) => p.id === id);
-    return patient ? patient.name : ` ${id}`;
+    return patient ? patient.name :  ` ${id}`;
   };
+  let navigate = useNavigate();
   return (
-    <>
+    <div>
       <div className="drawer-menu-container">
         <button className="drawer-toggle-btn" onClick={toggleDrawer}>
           <FontAwesomeIcon icon={faBars} />
@@ -230,7 +208,7 @@ function Appointments() {
               <button
                 className="buttons"
                 onClick={() => {
-                  navigate("/admin/dashboard");
+                  navigate("/doctor/dashboard");
                 }}
               >
                 Home
@@ -240,40 +218,20 @@ function Appointments() {
               <button
                 className="buttons"
                 onClick={() => {
-                  navigate("/admin/patient");
+                  navigate("/doctor/prescription");
                 }}
               >
-                Patients
+                Prescription
               </button>
             </li>
             <li>
               <button
                 className="buttons"
                 onClick={() => {
-                  navigate("/admin/appointment");
+                  navigate("/doctor/labtestassign");
                 }}
               >
-                Appointments
-              </button>
-            </li>
-            <li>
-              <button
-                className="buttons"
-                onClick={() => {
-                  navigate("/admin/laboratory");
-                }}
-              >
-                Lab Test Master
-              </button>
-            </li>
-            <li>
-              <button
-                className="buttons"
-                onClick={() => {
-                  navigate("/admin/doctors");
-                }}
-              >
-                Doctors
+                Lab Test Assign
               </button>
             </li>
           </ul>
@@ -300,7 +258,7 @@ function Appointments() {
               <li>
                 <button
                   className="profile-button"
-                  onClick={() => navigate("/admin/login")}
+                  onClick={() => navigate("/doctor/login")}
                 >
                   Logout
                 </button>
@@ -311,17 +269,17 @@ function Appointments() {
       </div>
       <div>
         <button onClick={() => handleAdd()} className="button">
-          + ADD APPOINTMENTS
+          + PRESCRIPTIONS
         </button>
       </div>
       {add && (
-        <Dialog open={add} onClose={handleClose1}>
-          <DialogTitle>Appointment</DialogTitle>
+        <Dialog open={add} onClose={handleDialogClose}>
+          <DialogTitle>Lab Test Details</DialogTitle>
           <DialogContent>
             <form>
               <div class="input-group flex-nowrap">
                 <span class="input-group-text" id="addon-wrapping">
-                  Patient Name :{" "}
+                  Patient Name :
                 </span>
                 <select
                   style={{ margin: "auto" }}
@@ -330,22 +288,21 @@ function Appointments() {
                   aria-describedby="addon-wrapping"
                   id="patientId"
                   name="patientId"
-                  value={appointmentData.patientId}
+                  value={prescription.patientId}
                   onChange={handleChange}
                   required
                 >
                   <option value="">Select Name</option>
+                  {console.log("Pec", pec)}
                   {pec.map((patient) => (
-                    <option key={patient.id} value={patient.id}>
-                      {patient.name}
-                    </option>
+                    <option key={patient.id} value={patient.id}>{patient.name}</option>
                   ))}
                 </select>
               </div>
               <br />
               <div class="input-group flex-nowrap">
                 <span class="input-group-text" id="addon-wrapping">
-                  Doctor Name :{" "}
+                  Doctor Name :
                 </span>
                 <select
                   style={{ margin: "auto" }}
@@ -354,98 +311,48 @@ function Appointments() {
                   aria-describedby="addon-wrapping"
                   id="doctorId"
                   name="doctorId"
-                  value={appointmentData.doctorId}
+                  value={prescription.doctorId}
                   onChange={handleChange}
                   required
                 >
                   <option value="">Select Name</option>
-
                   {doc.map((doctor) => (
-                    <option key={doctor.id} value={doctor.id}>
-                      {doctor.name}
-                    </option>
+                    <option key={doctor.id} value={doctor.id}>{doctor.name}</option>
                   ))}
                 </select>
               </div>
               <br />
               <div class="input-group flex-nowrap">
                 <span class="input-group-text" id="addon-wrapping">
-                  Time :
+                  prescription :
                 </span>
-                <input
+                <textarea
                   style={{ margin: "auto" }}
-                  type="text"
-                  className="form-control"
-                  id="time"
-                  name="time"
-                  value={appointmentData.time}
+                  cols={80}
+                  rows={3}
+                  class="form-control"
+                  placeholder="prescription"
+                  aria-label="prescription"
+                  aria-describedby="addon-wrapping"
+                  id="prescription"
+                  name="prescription"
+                  value={prescription.prescription}
                   onChange={handleChange}
                   required
-                />
+                ></textarea>
               </div>
               <br />
             </form>
           </DialogContent>
           <DialogActions>
-            <button className="btn btn-primary" onClick={() => handleCancel1()}>
+            <button className="btn btn-primary" onClick={handleDialogCancel}>
               Cancel
             </button>
-            <button
-              type="submit"
-              onClick={handleSubmit}
-              className="btn btn-primary"
-            >
+            <button className="btn btn-primary" onClick={handleDialogSubmit}>
               Submit
             </button>
-            <br />
-            <br />
           </DialogActions>
         </Dialog>
-      )}
-      {addAlert && (
-        <Stack sx={{ width: "100%" }} spacing={2}>
-          <Alert severity="success">Appointment Added Successfully!</Alert>
-        </Stack>
-      )}
-      {updateAlert && (
-        <Stack sx={{ width: "100%" }} spacing={2}>
-          <Alert severity="success">Appointment Updated Successfully!</Alert>
-        </Stack>
-      )}
-      {deleteAlert && (
-        <Dialog
-          open={deleteAlert}
-          onClose={() => handleDisagree()}
-          aria-labelledby="alert-dialog-title"
-          aria-describedby="alert-dialog-description"
-        >
-          <DialogTitle id="alert-dialog-title">Confirm</DialogTitle>
-          <DialogContent>
-            <DialogContentText id="alert-dialog-description">
-              Are you sure,you want to delete the data?
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <button
-              onClick={() => handleDisagree()}
-              className="btn btn-primary"
-            >
-              Disagree
-            </button>
-            <button
-              onClick={() => handleAgree()}
-              className="btn btn-primary"
-              autoFocus
-            >
-              Agree
-            </button>
-          </DialogActions>
-        </Dialog>
-      )}
-      {deleteSuccessAlert && (
-        <Stack sx={{ width: "100%" }} spacing={2}>
-          <Alert severity="success">Appointment Deleted Successfully!</Alert>
-        </Stack>
       )}
       {editProfile && (
         <Dialog open={editProfile} onClose={handleClose}>
@@ -465,7 +372,7 @@ function Appointments() {
                   aria-describedby="addon-wrapping"
                   id="hospitalname"
                   name="hospitalname"
-                  value={formData.hospitalName}
+                  value={formData.hospitalname}
                   onChange={handleChange1}
                   required
                 />
@@ -503,7 +410,7 @@ function Appointments() {
                   aria-describedby="addon-wrapping"
                   id="dob"
                   name="dob"
-                  value={formData.DOB}
+                  value={formData.dob}
                   onChange={handleChange1}
                   required
                 />
@@ -625,6 +532,25 @@ function Appointments() {
                 />
               </div>
               <br />
+              <div class="input-group flex-nowrap">
+                <span class="input-group-text" id="addon-wrapping">
+                  Confirm Password :{" "}
+                </span>
+                <input
+                  style={{ margin: "auto" }}
+                  type="password"
+                  class="form-control"
+                  placeholder="Confirm Password"
+                  aria-label="password"
+                  aria-describedby="addon-wrapping"
+                  id="confirmpassword"
+                  name="confirmpassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange1}
+                  required
+                />
+              </div>
+              <br />
             </form>
           </DialogContent>
           <DialogActions>
@@ -637,45 +563,62 @@ function Appointments() {
           </DialogActions>
         </Dialog>
       )}
+      {deleteAlert && (
+        <Dialog
+          open={deleteAlert}
+          onClose={() => handleDisagree()}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-prescription"
+        >
+          <DialogTitle id="alert-dialog-title">Confirm</DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-prescription">
+              Are you sure,you want to delete the data?
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <button
+              onClick={() => handleDisagree()}
+              className="btn btn-primary"
+            >
+              Disagree
+            </button>
+            <button
+              onClick={() => handleAgree()}
+              className="btn btn-primary"
+              autoFocus
+            >
+              Agree
+            </button>
+          </DialogActions>
+        </Dialog>
+      )}
       <div className="appointments-table" style={{ margin: "2%" }}>
         <center>
-          <h2>Appointments List</h2>
+          <h2>Prescription List</h2>
         </center>
         <table className="table" style={{ width: "120%" }}>
           <thead>
             <tr>
               <th>Patient Name</th>
               <th>Doctor Name</th>
-              <th>Time</th>
+              <th>prescription</th>
               <th>Activity</th>
             </tr>
           </thead>
           <tbody>
-            {appointmentsList.map((appointment, index) => (
-              <tr key={appointment._id}>
-                <td>{getPatientNameById(appointment.patientId)}</td>
-                <td>{getDoctorNameById(appointment.doctorId)}</td>
-                <td>{appointment.time}</td>
-                <td>
-                  <button
-                    className="btn btn-primary"
-                    onClick={() => handleUpdate(index)}
-                  >
-                    Update
-                  </button>{" "}
-                  <button
-                    className="btn btn-primary"
-                    onClick={() => handleDelete(index)}
-                  >
-                    Delete
-                  </button>
-                </td>
+            {newPrescription.map((pres, index) => (
+              <tr key={pres._id}>
+                <td>{getPatientNameById(pres.patientId)}</td>
+                <td>{getDoctorNameById(pres.doctorId)}</td>
+                <td>{pres.prescription}</td>
+                <td><button className="btn btn-primary" onClick={() => handleUpdate(index)}>Update</button>   <button className="btn btn-primary" onClick={() => handleDelete(index)}>Delete</button></td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-    </>
+    </div>
   );
 }
-export default Appointments;
+export default Prescription;

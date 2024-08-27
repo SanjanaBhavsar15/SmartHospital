@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React ,{useState} from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars ,faUserCircle } from '@fortawesome/free-solid-svg-icons';
 import './DrawerMenu.css'; 
@@ -7,7 +7,7 @@ import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
-const DrawerMenu = () => {
+function Doctorhome() {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [isProfileOpen,setIsProfileOpen]=useState(false)
     const [editProfile,setEditProfile]=useState(false)
@@ -22,14 +22,14 @@ const DrawerMenu = () => {
       username:'',
       password: '',
       confirmPassword: ''
-  });
+    });
     const handleChange1 = (e) => {
-      const { name, value } = e.target;
-      setFormData(prevState => ({
-          ...prevState,
-          [name]: value
-      }));
-  };
+        const { name, value } = e.target;
+        setFormData(prevState => ({
+            ...prevState,
+            [name]: value
+        }));
+    };
     const toggleDrawer = () => {
         setIsDrawerOpen(!isDrawerOpen);
     };
@@ -37,23 +37,23 @@ const DrawerMenu = () => {
       setIsProfileOpen(!isProfileOpen)
     }
     const handleEdit=()=>{
-      setEditProfile(true)
+        setEditProfile(true)
     }
     const handleClose=()=>{
-      setEditProfile(false)
+        setEditProfile(false)
     }
     const handleCancel=()=>{
-      setEditProfile(false)
-      setIsProfileOpen(false)
+        setEditProfile(false)
+        setIsProfileOpen(false)
     }
     const handleSubmit1=(e)=>{
-      e.preventDefault();
-      console.log(formData);
+        e.preventDefault();
+        console.log(formData);
     }
     let navigate=useNavigate()
-    return (
-        <>
-          <div className="drawer-menu-container">
+  return (
+    <div>
+        <div className="drawer-menu-container">
             <button className="drawer-toggle-btn" onClick={toggleDrawer}>
                 <FontAwesomeIcon icon={faBars} />
             </button>
@@ -63,10 +63,8 @@ const DrawerMenu = () => {
                 </button>
                 <ul className="drawer-menu">
                     <li><button className='buttons'>Home</button></li>
-                    <li><button className='buttons' onClick={()=>{navigate('/admin/patient')}}>Patients</button></li>
-                    <li><button onClick={()=>{navigate('/admin/appointment')}} className='buttons'>Appointments</button></li>
-                    <li><button className='buttons' onClick={()=>{navigate('/admin/laboratory')}}>Lab Test Master</button></li>
-                    <li><button className='buttons'onClick={()=>{navigate('/admin/doctors')}}>Doctors</button></li>
+                    <li><button className='buttons' onClick={()=>{navigate('/doctor/prescription')}}>Prescription</button></li>
+                    <li><button className='buttons' onClick={()=>{navigate('/doctor/labtestassign')}}>Lab Test Assign</button></li>
                 </ul>
             </div>
             <div className="main-content">
@@ -81,7 +79,7 @@ const DrawerMenu = () => {
               </button>
               <ul className='drawers-menu'>
                 <li><button className='profile-button' onClick={()=>handleEdit()}>Edit Profile</button></li><br></br>
-                <li><button className='profile-button' onClick={()=>navigate('/admin/login')}>Logout</button></li>
+                <li><button className='profile-button' onClick={()=>navigate('/doctor/login')}>Logout</button></li>
               </ul>
               </div>
             </div>
@@ -251,7 +249,7 @@ const DrawerMenu = () => {
           <button className='button' onClick={handleSubmit1} type="submit">Submit</button>
         </DialogActions>
       </Dialog>}
-        </>
-    );
-};
-export default DrawerMenu;
+    </div>
+  )
+}
+export default Doctorhome

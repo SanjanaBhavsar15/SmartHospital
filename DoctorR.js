@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
 import './HospitalRegistrationForm.css';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios'
 const HospitalRegistrationForm = () => {
     const [formData, setFormData] = useState({
-        hospitalname: '',
+        hospitalName: '',
         fullname:'',
-        dob:'',
+        DOB:'',
         age:'',
         gender:'',
         contact:'',
         email: '',
+        username:'',
         password: '',
+        confirmPassword: ''
     });
 
     const handleChange = (e) => {
@@ -25,22 +26,16 @@ const HospitalRegistrationForm = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         console.log(formData);
-        try{
-            axios.post('http://localhost:5000/hospital/register',formData)
-        }
-        catch(err){
-            console.log('err',err)
-        }
     }
     const handleLogin=()=>{
-        navigate('/user/login')
+        navigate('/doctor/login')
     }
     let navigate=useNavigate()
     return (
         
         <div className="container" style={{marginTop:"17%"}}>
             <div className="hospital-registration-form">
-                <h2>Registration Form</h2>
+                <h2>Hospital Registration Form</h2>
                 <form onSubmit={handleSubmit}>
                 <div class="input-group flex-nowrap">
                     <span class="input-group-text" id="addon-wrapping">Hospital Name  : </span>
@@ -53,7 +48,7 @@ const HospitalRegistrationForm = () => {
                         aria-describedby="addon-wrapping"
                         id='hospitalname'
                         name='patientname'
-                        value={formData.hospitalname}
+                        value={formData.hospitalName}
                         onChange={handleChange} required
                     />
                 </div><br/>
@@ -78,12 +73,12 @@ const HospitalRegistrationForm = () => {
                         style={{margin:'auto'}} 
                         type="date" 
                         class="form-control" 
-                        placeholder="dob" 
+                        placeholder="DOB" 
                         aria-label="dob" 
                         aria-describedby="addon-wrapping"
                         id='dob'
                         name='dob'
-                        value={formData.dob}
+                        value={formData.DOB}
                         onChange={handleChange} required
                     />
                     </div><br/>
@@ -150,6 +145,21 @@ const HospitalRegistrationForm = () => {
                     />
                     </div><br/>
                     <div class="input-group flex-nowrap">
+                    <span class="input-group-text" id="addon-wrapping">Username  : </span>
+                    <input
+                        style={{margin:'auto'}} 
+                        type="text" 
+                        class="form-control" 
+                        placeholder="Username" 
+                        aria-label="username" 
+                        aria-describedby="addon-wrapping"
+                        id='username'
+                        name='username'
+                        value={formData.username}
+                        onChange={handleChange} required
+                    />
+                    </div><br/>               
+                    <div class="input-group flex-nowrap">
                     <span class="input-group-text" id="addon-wrapping">Password  : </span>
                     <input
                         style={{margin:'auto'}} 
@@ -161,6 +171,21 @@ const HospitalRegistrationForm = () => {
                         id='password'
                         name='password'
                         value={formData.password}
+                        onChange={handleChange} required
+                    />
+                    </div><br/>
+                    <div class="input-group flex-nowrap">
+                    <span class="input-group-text" id="addon-wrapping">Confirm Password  : </span>
+                    <input
+                        style={{margin:'auto'}} 
+                        type="password" 
+                        class="form-control" 
+                        placeholder="Confirm Password" 
+                        aria-label="password" 
+                        aria-describedby="addon-wrapping"
+                        id='confirmpassword'
+                        name='confirmpassword'
+                        value={formData.confirmPassword}
                         onChange={handleChange} required
                     />
                     </div><br/>

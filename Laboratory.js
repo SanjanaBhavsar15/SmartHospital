@@ -1,4 +1,4 @@
-import React ,{useState} from 'react'
+import React ,{useEffect, useState} from 'react'
 import { Dialog, DialogActions, DialogContent,DialogContentText, DialogTitle } from '@mui/material'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars ,faUserCircle } from '@fortawesome/free-solid-svg-icons';
@@ -30,7 +30,6 @@ function Laboratory() {
         email: '',
         username:'',
         password: '',
-        confirmPassword: ''
     });
     const handleChange1=(e)=>{
         const { name, value } = e.target;
@@ -75,24 +74,23 @@ function Laboratory() {
     const handleLabCancel=()=>{
         setAdd(false)
     }
-    const handleLabSubmit=(e)=>{
+    const handleLabSubmit= async (e)=>{
         e.preventDefault();
-        if(selectedIndex!=null){
+        if(selectedIndex!==null){
             const updatedData=[...labList]
             updatedData[selectedIndex]=labData
-            setLabList(updatedData)
-            setSelectedIndex(null)
+            try {
+                await axios.put('http://localhost:5000/lab/update', updatedData[selectedIndex]);
+                console.log('Data updated successfully');
+            } catch (error) {
+                console.error('Error updating lab test:', error);
+            }
+            setLabList(updatedData);
+            setSelectedIndex(null);
             setUpdateAlert(true)
             setTimeout(() => {
-                setUpdateAlert(false)
+                setUpdateAlert(false) 
             }, 3000);
-            try{
-                axios.post('http://localhost:5000/lab/update',labData)
-                console.log("data updated")
-            }
-            catch(err){
-                console.log('err',err)
-            }
         }
         else{
         setLabList([...labList,labData])
@@ -131,21 +129,43 @@ function Laboratory() {
         setSelectedIndex(index)
         setDeleteAlert(true)
     }
-    const handleAgree=()=>{
+    const handleAgree= async ()=>{
+        if(selectedIndex!==null){
+            try {
+                // Make the delete API call
+                await axios.delete('http://localhost:5000/lab/delete');
+                console.log('Data deleted successfully');
+            } 
+            catch (error) {
+                console.error('Error deleting appointment:', error);
+            }
         const updatedLabList = labList.filter((test, index) => index !== selectedIndex);
         setLabList(updatedLabList);
         setSelectedIndex(null)
         setDeleteAlert(false);
-        console.log("button clicked")
         setDeleteSuccessAlert(true);
         setTimeout(() => {
             setDeleteSuccessAlert(false);
         }, 3000);
+        }
     }
     const handleDisagree=()=>{
         setDeleteAlert(false)
     }
     let navigate=useNavigate()
+    useEffect(() => {
+        // Fetch appointments data when component mounts
+        const fetchData = async () => {
+          try {
+            const response = await axios.get('http://localhost:5000/lab/read');
+            console.log("aaa----,", response.data)
+            setLabList(response.data.data);
+          } catch (error) {
+            console.error('Error fetching appointments:', error);
+          }
+        };
+        fetchData();
+      }, []);
   return (
     <>
     <div className="drawer-menu-container">
@@ -160,7 +180,7 @@ function Laboratory() {
                 <li><button className='buttons' onClick={()=>{navigate('/admin/dashboard')}}>Home</button></li>
                 <li><button className='buttons' onClick={()=>{navigate('/admin/patient')}}>Patients</button></li>
                 <li><button className='buttons' onClick={()=>{navigate('/admin/appointment')}}>Appointments</button></li>
-                <li><button className='buttons' onClick={()=>{navigate('/admin/laboratory')}}>Laboratory</button></li>
+                <li><button className='buttons' onClick={()=>{navigate('/admin/laboratory')}}>Lab Test Master</button></li>
                 <li><button className='buttons' onClick={()=>{navigate('/admin/doctors')}}>Doctors</button></li>
             </ul>
         </div>
@@ -191,7 +211,8 @@ function Laboratory() {
             <input
                 type='text'
                 style={{margin:'auto'}} 
-                class="form-control" 
+                class="form-control"
+                placeholder='Name' 
                 id='name'
                 name='name'
                 value={labData.name}
@@ -203,6 +224,7 @@ function Laboratory() {
             <input
                 style={{margin:'auto'}} 
                 class="form-control" 
+                placeholder='Cost'
                 id='cost'
                 name='cost'
                 value={labData.cost}
@@ -215,6 +237,7 @@ function Laboratory() {
                 type='text'
                 style={{margin:'auto'}} 
                 class="form-control" 
+                placeholder='Description'
                 id='description'
                 name='description'
                 value={labData.description}
@@ -379,22 +402,7 @@ function Laboratory() {
                         value={formData.password}
                         onChange={handleChange1} required
                     />
-                    </div><br/>
-                    <div class="input-group flex-nowrap">
-                    <span class="input-group-text" id="addon-wrapping">Confirm Password  : </span>
-                    <input
-                        style={{margin:'auto'}} 
-                        type="password" 
-                        class="form-control" 
-                        placeholder="Confirm Password" 
-                        aria-label="password" 
-                        aria-describedby="addon-wrapping"
-                        id='confirmpassword'
-                        name='confirmpassword'
-                        value={formData.confirmPassword}
-                        onChange={handleChange1} required
-                    />
-                    </div><br/>                
+                    </div><br/>           
                   </form>
         </DialogContent>
         <DialogActions>
@@ -424,7 +432,7 @@ function Laboratory() {
         </DialogActions>
     </Dialog>} 
     <div className="appointments-table" style={{margin:'2%'}}>
-    <center><h2>Patient's Lab Test List</h2></center>
+    <center><h2>Lab Test List</h2></center>
     <table className='table'>
         <thead>
             <tr>

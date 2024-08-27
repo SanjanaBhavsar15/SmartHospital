@@ -1,4 +1,4 @@
-import React,{useState} from 'react'
+import React,{useState ,useEffect} from 'react'
 import { Dialog, DialogActions, DialogContent, DialogTitle ,DialogContentText} from '@mui/material'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars ,faUserCircle } from '@fortawesome/free-solid-svg-icons';
@@ -8,11 +8,12 @@ import Stack from '@mui/material/Stack';
 import axios from 'axios'
 function Doctors() {
     const [doctorData,setDoctorData]=useState({
-        doctorname:'',
+        name:'',
         contact:'',
         email:'',
         speciality:'',
-        availabilty:'',
+        availability:'',
+        password:'',
     })
     const [doctorList,setDoctorList]=useState([])
     const handleChange=(e)=>{
@@ -30,54 +31,51 @@ function Doctors() {
     const handleCancel1=()=>{
         setAdd(false)
     }
-    const handleSubmit=(e)=>{
-        e.preventDefault()
-        if(selectedIndex!=null){
-            const updatedDoctorData=[...doctorList]
-            updatedDoctorData[selectedIndex]=doctorData
-            setDoctorList(updatedDoctorData)
-            setSelectedIndex(null)
-            setUpdateAlert(true)
-            setTimeout(() => {
-                setUpdateAlert(false)
-            }, 3000);
-            console.log(doctorData)
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (selectedIndex !== null) {
+            const updatedDoctorData = [...doctorList];
+            updatedDoctorData[selectedIndex] = doctorData;
+            try {
+                await axios.post('http://localhost:5000/doctor/update', doctorData);
+                console.log('Data updated successfully');
+                setDoctorList(updatedDoctorData);
+                setUpdateAlert(true);
+                setTimeout(() => {
+                    setUpdateAlert(false);
+                }, 3000);
+            } catch (error) {
+                console.error('Error updating doctor:', error);
+            }
+        } else {
+            try {
+                await axios.post('http://localhost:5000/doctor/create', doctorData);
+                console.log("data sent successfully");
+                localStorage.setItem("email",doctorData.email)
+                localStorage.setItem("password",doctorData.password)
+                setDoctorList([...doctorList, doctorData]);
+                setAddAlert(true);
+                setTimeout(() => {
+                    setAddAlert(false);
+                }, 3000);
+            } catch (err) {
+                console.log('err', err);
+            }
         }
-        else{
-            setDoctorList([...doctorList,doctorData])
-            console.log(doctorData)
-            setAddAlert(true)
-            setTimeout(() => {
-              setAddAlert(false)
-            }, 3000);
-        }
-        try{
-            axios.post('http://localhost:5000/doctor/create',doctorData)
-            console.log("data sent successfully")
-        }
-        catch(err){
-            console.log('err',err)
-        }
-        setAdd(false);
-        setDoctorData({
-            doctorname:'',
-            contact:'',
-            email:'',
-            speciality:'',
-            availabilty:'',
-        })
+        handleCancel1();
     }
+
     const [selectedIndex,setSelectedIndex]=useState(null)
     const [updateAlert,setUpdateAlert]=useState(false)
     const handleUpdate=(index)=>{
         setAdd(true)
         setSelectedIndex(index)
         setDoctorData({
-            doctorname:doctorList[index].doctorname,
+            name:doctorList[index].name,
             contact:doctorList[index].contact,
             email:doctorList[index].email,
             speciality:doctorList[index].speciality,
-            availabilty:doctorList[index].availabilty
+            availability:doctorList[index].availability
         })
     }
     const [deleteSuccessAlert,setDeleteSuccessAlert]=useState(false)
@@ -86,16 +84,26 @@ function Doctors() {
         setSelectedIndex(index)
         setDeleteAlert(true)
     }
-    const handleAgree=()=>{
-        const dataToDelete=doctorList.filter((doctor,index)=>index!==selectedIndex)
-        setDoctorList(dataToDelete)
-        setSelectedIndex(null)
-        setDeleteAlert(false);
-        setDeleteSuccessAlert(true)
-        setTimeout(() => {
-            setDeleteSuccessAlert(false)
-        }, 3000);
-    }
+    const handleAgree = async (_id) => {
+        console.log("clicked")
+        if (selectedIndex!== null) {
+          try {
+            await axios.delete(`http://localhost:5000/doctor/delete/${_id}`);
+            console.log('Data deleted successfully');
+            const dataToDelete = doctorList.filter((doctor, index) => index!== selectedIndex);
+            setDoctorList(dataToDelete);
+            setSelectedIndex(null);
+            setDeleteAlert(false);
+            setDeleteSuccessAlert(true);
+            setTimeout(() => {
+              setDeleteSuccessAlert(false);
+            }, 3000);
+          } catch (error) {
+            console.error('Error deleting doctor:', error);
+          }
+        }
+      }
+
     const handleDisagree=()=>{
         setDeleteAlert(false)
     }
@@ -109,7 +117,6 @@ function Doctors() {
         email: '',
         username:'',
         password: '',
-        confirmPassword: ''
     });
     const handleChange1=(e)=>{
         const { name, value } = e.target;
@@ -142,10 +149,24 @@ function Doctors() {
         setEditProfile(false)
     }
     let navigate=useNavigate()
+    useEffect(() => {
+        // Fetch appointments data when component mounts
+        const fetchData = async () => {
+          try {
+            const response = await axios.get('http://localhost:5000/doctor/read');
+            console.log("aaa----,", response.data)
+            setDoctorList(response.data.data);
+          } catch (error) {
+            console.error('Error fetching appointments:', error);
+          }
+        };
+    
+        fetchData();
+      }, []);
   return (
    <>
     <div className="drawer-menu-container">
-            <button className="drawer-toggle-btn" onClick={toggleDrawer}>
+            <button className="drawer-toggle-btn" onClick={toggleDrawer}> 
                 <FontAwesomeIcon icon={faBars} />
             </button>
              <div className={`drawer ${isDrawerOpen ? 'open' : ''}`}>
@@ -156,7 +177,7 @@ function Doctors() {
                     <li><button className='buttons' onClick={()=>{navigate('/admin/dashboard')}}>Home</button></li>
                     <li><button className='buttons' onClick={()=>{navigate('/admin/patient')}}>Patients</button></li>
                     <li><button className='buttons' onClick={()=>{navigate('/admin/appointment')}}>Appointments</button></li>
-                    <li><button className='buttons' onClick={()=>{navigate('/admin/laboratory')}}>Laboratory</button></li>
+                    <li><button className='buttons' onClick={()=>{navigate('/admin/laboratory')}}>Lab Test Master</button></li>
                     <li><button className='buttons'onClick={()=>{navigate('/admin/doctors')}}>Doctors</button></li>
                 </ul>
             </div>
@@ -183,17 +204,17 @@ function Doctors() {
         <DialogContent>
             <form>
             <div class="input-group flex-nowrap">
-            <span class="input-group-text" id="addon-wrapping">Doctor Name  : </span>
+            <span class="input-group-text" id="addon-wrapping">Name  : </span>
             <input
                 style={{margin:'auto'}} 
                 type="text" 
                 class="form-control" 
-                placeholder="Doctor Name" 
-                aria-label="doctorname" 
+                placeholder="Name" 
+                aria-label="name" 
                 aria-describedby="addon-wrapping"
-                id='doctorname'
-                name='doctorname'
-                value={doctorData.doctorname}
+                id='name'
+                name='name'
+                value={doctorData.name}
                 onChange={handleChange} required
                 />
             </div><br/>
@@ -243,17 +264,32 @@ function Doctors() {
                 />
             </div><br/>
             <div class="input-group flex-nowrap">
-            <span class="input-group-text" id="addon-wrapping">Availabilty  : </span>
+            <span class="input-group-text" id="addon-wrapping">Availability  : </span>
             <input
                 style={{margin:'auto'}} 
                 type="text" 
                 class="form-control" 
-                placeholder="Availabilty" 
-                aria-label="availabilty" 
+                placeholder="Availability" 
+                aria-label="availability" 
                 aria-describedby="addon-wrapping"
-                id='availabilty'
-                name='availabilty'
-                value={doctorData.availabilty}
+                id='availability'
+                name='availability'
+                value={doctorData.availability}
+                onChange={handleChange} required
+                />
+            </div><br/>
+            <div class="input-group flex-nowrap">
+            <span class="input-group-text" id="addon-wrapping">Password  : </span>
+            <input
+                style={{margin:'auto'}} 
+                type="text" 
+                class="form-control" 
+                placeholder="Password" 
+                aria-label="password" 
+                aria-describedby="addon-wrapping"
+                id='password'
+                name='password'
+                value={doctorData.password}
                 onChange={handleChange} required
                 />
             </div><br/>
@@ -416,21 +452,6 @@ function Doctors() {
                         value={formData.password}
                         onChange={handleChange1} required
                     />
-                    </div><br/>
-                    <div class="input-group flex-nowrap">
-                    <span class="input-group-text" id="addon-wrapping">Confirm Password  : </span>
-                    <input
-                        style={{margin:'auto'}} 
-                        type="password" 
-                        class="form-control" 
-                        placeholder="Confirm Password" 
-                        aria-label="password" 
-                        aria-describedby="addon-wrapping"
-                        id='confirmpassword'
-                        name='confirmpassword'
-                        value={formData.confirmPassword}
-                        onChange={handleChange1} required
-                    />
                     </div><br/>                
                   </form>
         </DialogContent>
@@ -465,22 +486,22 @@ function Doctors() {
                 <table className="table" style={{width: '120%'}}>
                     <thead>
                         <tr>
-                            <th>Doctor Name</th>
+                            <th>Name</th>
                             <th>Contact</th>
                             <th>Email</th>
                             <th>Speciality</th>
-                            <th>Availabilty</th>
+                            <th>Availability</th>
                             <th>Activity</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {doctorList.map((doctor, index) => (
+                        {doctorList.map((doctor, index) => (  
                             <tr key={index}>
-                                <td>{doctor.doctorname}</td>
+                                <td>{doctor.name}</td>
                                 <td>{doctor.contact}</td>
                                 <td>{doctor.email}</td>
                                 <td>{doctor.speciality}</td>
-                                <td>{doctor.availabilty}</td>
+                                <td>{doctor.availability}</td>
                                 <td><button className='btn btn-primary' onClick={()=>handleUpdate(index)}>Update</button>   <button className='btn btn-primary' onClick={()=>handleDelete(index)}>Delete</button></td>                            </tr>
                         ))}
                     </tbody>
